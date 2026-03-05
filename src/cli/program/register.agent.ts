@@ -42,6 +42,7 @@ export function registerAgentCommands(program: Command, args: { agentChannelOpti
       false,
     )
     .option("--deliver", "Send the agent's reply back to the selected channel", false)
+    .option("--model <ref>", "Override model for this run (e.g. claude-cli/sonnet)")
     .option("--json", "Output result as JSON", false)
     .option(
       "--timeout <seconds>",

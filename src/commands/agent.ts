@@ -29,6 +29,7 @@ import {
   modelKey,
   normalizeModelRef,
   normalizeProviderId,
+  parseModelRef,
   resolveConfiguredModelRef,
   resolveDefaultModelForAgent,
   resolveThinkingDefault,
@@ -730,6 +731,16 @@ async function agentCommandInternal(
         model = normalizedStored.model;
       }
     }
+
+    // CLI --model override: highest priority, overrides both default and stored model
+    if (opts.model) {
+      const cliModelRef = parseModelRef(opts.model, defaultProvider);
+      if (cliModelRef) {
+        provider = cliModelRef.provider;
+        model = cliModelRef.model;
+      }
+    }
+
     if (sessionEntry) {
       const authProfileId = sessionEntry.authProfileOverride;
       if (authProfileId) {

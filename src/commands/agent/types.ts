@@ -36,6 +36,8 @@ export type AgentCommandOpts = {
   clientTools?: ClientToolDefinition[];
   /** Agent id override (must exist in config). */
   agentId?: string;
+  /** Model override for this run (e.g. "claude-cli/sonnet"). Skips configured primary. */
+  model?: string;
   to?: string;
   sessionId?: string;
   sessionKey?: string;

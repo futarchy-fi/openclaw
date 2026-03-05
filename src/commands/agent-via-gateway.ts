@@ -35,6 +35,7 @@ const NO_GATEWAY_TIMEOUT_MS = 2_147_000_000;
 export type AgentCliOpts = {
   message: string;
   agent?: string;
+  model?: string;
   to?: string;
   sessionId?: string;
   thinking?: string;
@@ -182,6 +183,7 @@ export async function agentCliCommand(opts: AgentCliOpts, runtime: RuntimeEnv, d
     ...opts,
     agentId: opts.agent,
     replyAccountId: opts.replyAccount,
+    model: opts.model,
   };
   if (opts.local === true) {
     return await agentCommand(localOpts, runtime, deps);
