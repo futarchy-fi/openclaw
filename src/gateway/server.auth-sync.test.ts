@@ -63,6 +63,22 @@ describe("gateway auth.sync.push", () => {
     });
   });
 
+  it("rejects requests missing required oauth credential fields before profile handling", async () => {
+    await withServer(async (ws) => {
+      await connectOk(ws, { token: "secret", scopes: ["operator.auth-sync"] });
+
+      const res = await rpcReq(ws, "auth.sync.push", {
+        ...validAuthSyncPushParams,
+        credential: {},
+      });
+
+      expect(res.ok).toBe(false);
+      expect(res.error?.code).toBe("INVALID_REQUEST");
+      expect(res.error?.message).toContain("invalid auth.sync.push params");
+      expect(res.error?.message).toContain("must have required property 'type'");
+    });
+  });
+
   it("returns a typed rejection for unsupported credential types", async () => {
     await withServer(async (ws) => {
       await connectOk(ws, { token: "secret", scopes: ["operator.auth-sync"] });
