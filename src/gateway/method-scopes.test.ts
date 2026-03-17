@@ -12,6 +12,7 @@ describe("method scope resolution", () => {
     ["sessions.resolve", ["operator.read"]],
     ["config.schema.lookup", ["operator.read"]],
     ["poll", ["operator.write"]],
+    ["auth.sync.push", ["operator.auth-sync"]],
     ["config.patch", ["operator.admin"]],
     ["wizard.start", ["operator.admin"]],
     ["update.run", ["operator.admin"]],
@@ -49,6 +50,13 @@ describe("operator scope authorization", () => {
     expect(authorizeOperatorScopesForMethod("exec.approval.resolve", ["operator.write"])).toEqual({
       allowed: false,
       missingScope: "operator.approvals",
+    });
+  });
+
+  it("requires auth-sync scope for auth sync methods", () => {
+    expect(authorizeOperatorScopesForMethod("auth.sync.push", ["operator.write"])).toEqual({
+      allowed: false,
+      missingScope: "operator.auth-sync",
     });
   });
 

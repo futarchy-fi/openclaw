@@ -1,6 +1,12 @@
 import type { ErrorObject } from "ajv";
 import { describe, expect, it } from "vitest";
-import { formatValidationErrors, validateTalkConfigResult } from "./index.js";
+import {
+  formatValidationErrors,
+  validateAuthSyncPushParams,
+  validateAuthSyncPushRejectedResult,
+  validateAuthSyncPushResult,
+  validateTalkConfigResult,
+} from "./index.js";
 
 const makeError = (overrides: Partial<ErrorObject>): ErrorObject => ({
   keyword: "type",
@@ -60,6 +66,81 @@ describe("formatValidationErrors", () => {
     expect(formatValidationErrors([err, err])).toBe(
       "at /auth: must have required property 'token'",
     );
+  });
+});
+
+describe("validateAuthSyncPushParams", () => {
+  it("accepts a valid auth sync push payload", () => {
+    expect(
+      validateAuthSyncPushParams({
+        payloadVersion: 1,
+        pushId: "push-123",
+        profileId: "anthropic:default",
+        credential: {
+          provider: "anthropic",
+          access: "token-value",
+          refresh: "refresh-value",
+          expires: 1_700_000_000_000,
+          accountId: "acct-123",
+          email: "me@example.com",
+        },
+        snapshot: {
+          sequence: 12,
+          observedAtMs: 1_700_000_000_000,
+          source: "auth.json",
+          authFileMtimeMs: 1_700_000_000_100,
+          helperVersion: "1.2.3",
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects unexpected properties", () => {
+    expect(
+      validateAuthSyncPushParams({
+        payloadVersion: 1,
+        pushId: "push-123",
+        profileId: "anthropic:default",
+        credential: {
+          provider: "anthropic",
+          access: "token-value",
+          unexpected: true,
+        },
+        snapshot: {
+          sequence: 12,
+          observedAtMs: 1_700_000_000_000,
+          source: "auth.json",
+          helperVersion: "1.2.3",
+        },
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("validateAuthSyncPushResult", () => {
+  it("accepts rejected auth sync push results", () => {
+    const result = {
+      ok: false,
+      status: "rejected",
+      reason: "profile_not_allowed",
+      message: "auth.sync.push is not enabled for this profile yet",
+      pushId: "push-123",
+      profileId: "anthropic:default",
+    };
+
+    expect(validateAuthSyncPushRejectedResult(result)).toBe(true);
+    expect(validateAuthSyncPushResult(result)).toBe(true);
+  });
+
+  it("rejects incomplete accepted results", () => {
+    expect(
+      validateAuthSyncPushResult({
+        ok: true,
+        status: "updated",
+        pushId: "push-123",
+        profileId: "anthropic:default",
+      }),
+    ).toBe(false);
   });
 });
 

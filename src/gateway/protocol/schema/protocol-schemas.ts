@@ -41,6 +41,11 @@ import {
   ToolsCatalogResultSchema,
 } from "./agents-models-skills.js";
 import {
+  AuthSyncPushParamsSchema,
+  AuthSyncPushRejectedResultSchema,
+  AuthSyncPushResultSchema,
+} from "./auth-sync.js";
+import {
   ChannelsLogoutParamsSchema,
   TalkConfigParamsSchema,
   TalkConfigResultSchema,
@@ -171,6 +176,9 @@ export const ProtocolSchemas = {
   Snapshot: SnapshotSchema,
   ErrorShape: ErrorShapeSchema,
   AgentEvent: AgentEventSchema,
+  AuthSyncPushParams: AuthSyncPushParamsSchema,
+  AuthSyncPushRejectedResult: AuthSyncPushRejectedResultSchema,
+  AuthSyncPushResult: AuthSyncPushResultSchema,
   SendParams: SendParamsSchema,
   PollParams: PollParamsSchema,
   AgentParams: AgentParamsSchema,

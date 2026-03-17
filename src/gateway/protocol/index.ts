@@ -7,6 +7,12 @@ import {
   AgentIdentityParamsSchema,
   type AgentIdentityResult,
   AgentIdentityResultSchema,
+  type AuthSyncPushParams,
+  AuthSyncPushParamsSchema,
+  type AuthSyncPushRejectedResult,
+  AuthSyncPushRejectedResultSchema,
+  type AuthSyncPushResult,
+  AuthSyncPushResultSchema,
   AgentParamsSchema,
   type AgentSummary,
   AgentSummarySchema,
@@ -265,6 +271,11 @@ export const validatePollParams = ajv.compile<PollParams>(PollParamsSchema);
 export const validateAgentParams = ajv.compile(AgentParamsSchema);
 export const validateAgentIdentityParams =
   ajv.compile<AgentIdentityParams>(AgentIdentityParamsSchema);
+export const validateAuthSyncPushParams = ajv.compile<AuthSyncPushParams>(AuthSyncPushParamsSchema);
+export const validateAuthSyncPushRejectedResult = ajv.compile<AuthSyncPushRejectedResult>(
+  AuthSyncPushRejectedResultSchema,
+);
+export const validateAuthSyncPushResult = ajv.compile<AuthSyncPushResult>(AuthSyncPushResultSchema);
 export const validateAgentWaitParams = ajv.compile<AgentWaitParams>(AgentWaitParamsSchema);
 export const validateWakeParams = ajv.compile<WakeParams>(WakeParamsSchema);
 export const validateAgentsListParams = ajv.compile<AgentsListParams>(AgentsListParamsSchema);
@@ -475,6 +486,9 @@ export {
   AgentParamsSchema,
   AgentIdentityParamsSchema,
   AgentIdentityResultSchema,
+  AuthSyncPushParamsSchema,
+  AuthSyncPushRejectedResultSchema,
+  AuthSyncPushResultSchema,
   WakeParamsSchema,
   PushTestParamsSchema,
   PushTestResultSchema,
@@ -577,6 +591,9 @@ export type {
   AgentEvent,
   AgentIdentityParams,
   AgentIdentityResult,
+  AuthSyncPushParams,
+  AuthSyncPushRejectedResult,
+  AuthSyncPushResult,
   AgentWaitParams,
   ChatEvent,
   TickEvent,
