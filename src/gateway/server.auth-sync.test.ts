@@ -7,9 +7,10 @@ installGatewayTestHooks({ scope: "suite" });
 const validAuthSyncPushParams = {
   payloadVersion: 1,
   pushId: "push-123",
-  profileId: "anthropic:default",
+  profileId: "openai-codex:default",
   credential: {
-    provider: "anthropic",
+    type: "oauth",
+    provider: "openai-codex",
     access: "token-value",
     refresh: "refresh-value",
     expires: 1_700_000_000_000,
@@ -57,8 +58,81 @@ describe("gateway auth.sync.push", () => {
         reason: "profile_not_allowed",
         message: "auth.sync.push is not enabled for this profile yet",
         pushId: "push-123",
-        profileId: "anthropic:default",
+        profileId: "openai-codex:default",
       });
+    });
+  });
+
+  it("returns a typed rejection for unsupported credential types", async () => {
+    await withServer(async (ws) => {
+      await connectOk(ws, { token: "secret", scopes: ["operator.auth-sync"] });
+
+      const res = await rpcReq<{
+        ok: boolean;
+        status: string;
+        reason: string;
+        message: string;
+      }>(ws, "auth.sync.push", {
+        ...validAuthSyncPushParams,
+        credential: {
+          ...validAuthSyncPushParams.credential,
+          type: "token",
+        },
+      });
+
+      expect(res.ok).toBe(true);
+      expect(res.payload?.status).toBe("rejected");
+      expect(res.payload?.reason).toBe("credential_type_invalid");
+      expect(res.payload?.message).toContain("credential.type must be oauth");
+    });
+  });
+
+  it("returns a typed rejection for unsupported providers", async () => {
+    await withServer(async (ws) => {
+      await connectOk(ws, { token: "secret", scopes: ["operator.auth-sync"] });
+
+      const res = await rpcReq<{
+        ok: boolean;
+        status: string;
+        reason: string;
+        message: string;
+      }>(ws, "auth.sync.push", {
+        ...validAuthSyncPushParams,
+        credential: {
+          ...validAuthSyncPushParams.credential,
+          provider: "anthropic",
+        },
+      });
+
+      expect(res.ok).toBe(true);
+      expect(res.payload?.status).toBe("rejected");
+      expect(res.payload?.reason).toBe("provider_invalid");
+      expect(res.payload?.message).toContain("credential.provider must be openai-codex");
+    });
+  });
+
+  it("returns a typed rejection for malformed oauth credentials", async () => {
+    await withServer(async (ws) => {
+      await connectOk(ws, { token: "secret", scopes: ["operator.auth-sync"] });
+
+      const res = await rpcReq<{
+        ok: boolean;
+        status: string;
+        reason: string;
+        message: string;
+      }>(ws, "auth.sync.push", {
+        ...validAuthSyncPushParams,
+        credential: {
+          ...validAuthSyncPushParams.credential,
+          access: "   ",
+          expires: 0,
+        },
+      });
+
+      expect(res.ok).toBe(true);
+      expect(res.payload?.status).toBe("rejected");
+      expect(res.payload?.reason).toBe("credential_invalid");
+      expect(res.payload?.message).toContain("non-empty access/refresh tokens");
     });
   });
 

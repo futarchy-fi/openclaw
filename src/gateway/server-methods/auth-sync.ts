@@ -11,26 +11,66 @@ import {
 import type { GatewayRequestHandlers } from "./types.js";
 import { assertValidParams } from "./validation.js";
 
-function buildRejectedResult(params: AuthSyncPushParams): AuthSyncPushRejectedResult {
-  if (params.payloadVersion !== 1) {
-    return {
-      ok: false,
-      status: "rejected",
-      reason: "payload_version_unsupported",
-      message: `unsupported auth.sync.push payloadVersion: ${params.payloadVersion}`,
-      pushId: params.pushId.trim(),
-      profileId: params.profileId.trim(),
-    };
-  }
+type AuthSyncPushRejectedReason = AuthSyncPushRejectedResult["reason"];
 
+function rejectedResult(
+  params: Pick<AuthSyncPushParams, "pushId" | "profileId">,
+  reason: AuthSyncPushRejectedReason,
+  message: string,
+): AuthSyncPushRejectedResult {
   return {
     ok: false,
     status: "rejected",
-    reason: "profile_not_allowed",
-    message: "auth.sync.push is not enabled for this profile yet",
+    reason,
+    message,
     pushId: params.pushId.trim(),
     profileId: params.profileId.trim(),
   };
+}
+
+function buildRejectedResult(params: AuthSyncPushParams): AuthSyncPushRejectedResult {
+  if (params.payloadVersion !== 1) {
+    return rejectedResult(
+      params,
+      "payload_version_unsupported",
+      `unsupported auth.sync.push payloadVersion: ${params.payloadVersion}`,
+    );
+  }
+
+  if (params.credential.type.trim() !== "oauth") {
+    return rejectedResult(
+      params,
+      "credential_type_invalid",
+      "auth.sync.push credential.type must be oauth",
+    );
+  }
+
+  if (params.credential.provider.trim() !== "openai-codex") {
+    return rejectedResult(
+      params,
+      "provider_invalid",
+      "auth.sync.push credential.provider must be openai-codex",
+    );
+  }
+
+  if (
+    !params.credential.access.trim() ||
+    !params.credential.refresh.trim() ||
+    !Number.isSafeInteger(params.credential.expires) ||
+    params.credential.expires <= 0
+  ) {
+    return rejectedResult(
+      params,
+      "credential_invalid",
+      "auth.sync.push credential must include non-empty access/refresh tokens and a positive expires timestamp",
+    );
+  }
+
+  return rejectedResult(
+    params,
+    "profile_not_allowed",
+    "auth.sync.push is not enabled for this profile yet",
+  );
 }
 
 export const authSyncHandlers: GatewayRequestHandlers = {

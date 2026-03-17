@@ -75,9 +75,10 @@ describe("validateAuthSyncPushParams", () => {
       validateAuthSyncPushParams({
         payloadVersion: 1,
         pushId: "push-123",
-        profileId: "anthropic:default",
+        profileId: "openai-codex:default",
         credential: {
-          provider: "anthropic",
+          type: "oauth",
+          provider: "openai-codex",
           access: "token-value",
           refresh: "refresh-value",
           expires: 1_700_000_000_000,
@@ -95,15 +96,35 @@ describe("validateAuthSyncPushParams", () => {
     ).toBe(true);
   });
 
+  it("rejects credential payloads missing required oauth fields", () => {
+    expect(
+      validateAuthSyncPushParams({
+        payloadVersion: 1,
+        pushId: "push-123",
+        profileId: "openai-codex:default",
+        credential: {},
+        snapshot: {
+          sequence: 12,
+          observedAtMs: 1_700_000_000_000,
+          source: "auth.json",
+          helperVersion: "1.2.3",
+        },
+      }),
+    ).toBe(false);
+  });
+
   it("rejects unexpected properties", () => {
     expect(
       validateAuthSyncPushParams({
         payloadVersion: 1,
         pushId: "push-123",
-        profileId: "anthropic:default",
+        profileId: "openai-codex:default",
         credential: {
-          provider: "anthropic",
+          type: "oauth",
+          provider: "openai-codex",
           access: "token-value",
+          refresh: "refresh-value",
+          expires: 1_700_000_000_000,
           unexpected: true,
         },
         snapshot: {
@@ -125,7 +146,7 @@ describe("validateAuthSyncPushResult", () => {
       reason: "profile_not_allowed",
       message: "auth.sync.push is not enabled for this profile yet",
       pushId: "push-123",
-      profileId: "anthropic:default",
+      profileId: "openai-codex:default",
     };
 
     expect(validateAuthSyncPushRejectedResult(result)).toBe(true);
@@ -138,7 +159,7 @@ describe("validateAuthSyncPushResult", () => {
         ok: true,
         status: "updated",
         pushId: "push-123",
-        profileId: "anthropic:default",
+        profileId: "openai-codex:default",
       }),
     ).toBe(false);
   });

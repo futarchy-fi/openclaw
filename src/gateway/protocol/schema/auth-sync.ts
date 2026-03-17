@@ -5,11 +5,11 @@ const AuthSyncSourceSchema = Type.String({ enum: ["keychain", "auth.json"] });
 
 export const AuthSyncPushCredentialSchema = Type.Object(
   {
-    type: Type.Optional(Type.String()),
-    provider: Type.Optional(Type.String()),
-    access: Type.Optional(Type.String()),
-    refresh: Type.Optional(Type.String()),
-    expires: Type.Optional(Type.Integer({ minimum: 0 })),
+    type: Type.String(),
+    provider: Type.String(),
+    access: Type.String(),
+    refresh: Type.String(),
+    expires: Type.Integer(),
     accountId: Type.Optional(Type.String()),
     email: Type.Optional(Type.String()),
   },
